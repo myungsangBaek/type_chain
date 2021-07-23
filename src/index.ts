@@ -9,10 +9,14 @@ class Block{
   public timestamp : number;
 
 //static method = 메서드가 block class 안에 있고 클래스가 생성되지 않아도 호출 가능한 class
-  static calculateBlockHash = (index:number, previousHash:string, timestamp:number, data:string) :string => CryptoJS.SHA256(index + previousHash + timestamp + data).toString();
+  static calculateBlockHash = (
+    index:number, 
+    previousHash:string, 
+    timestamp:number, 
+    data:string):  string => 
+    CryptoJS.SHA256(index + previousHash + timestamp + data).toString();
     
   
-
   constructor(  //함수
     index: number,
     hash: string,
@@ -40,4 +44,27 @@ const getLatestBlock =() : Block => blockchain[blockchain.length - 1]; //블록�
 const getNewTimeStamp =() : number => Math.round(new Date().getTime() / 1000);
 //블록체인 : 블록의 연결
 //블록을 만들기 위해서는 해쉬가 필요하고 해쉬는 모든 속성을 길고 수학적으로 하나의 문자열로 결합한 것 
+
+const createNewBlock = (data:string) : Block =>{
+  const previousBlock : Block = getLatestBlock();
+  const newIndex : number = previousBlock.index + 1;
+  const newTimestamp : number = getNewTimeStamp();
+  const newHash : string = Block.calculateBlockHash(
+    newIndex, 
+    previousBlock.hash, 
+    newTimestamp, 
+    data
+    );
+  const newBlock : Block = new Block(
+    newIndex, 
+    newHash, 
+    previousBlock.hash,
+    data, 
+    newTimestamp
+    );
+    return newBlock;
+};
+
+console.log(createNewBlock("hello"), createNewBlock("bye bye"));
+
 export {};
