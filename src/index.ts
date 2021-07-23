@@ -1,5 +1,4 @@
 import * as CryptoJS from "crypto-js";
-import { isBlock } from "typescript";
 
 //블록 구조 
 class Block{
@@ -9,7 +8,8 @@ class Block{
     index:number, 
     previousHash:string, 
     timestamp:number, 
-    data:string):  string => 
+    data:string
+    ): string => 
     CryptoJS.SHA256(index + previousHash + timestamp + data).toString();
 
  //블록의 구조가 유효한지 아닌지 체크   
@@ -46,15 +46,15 @@ class Block{
 }
 
 
-const genesisBlock:Block = new Block(0, "1231243532", "", "Hello", 123456);
+const genesisBlock:Block = new Block(0, "1231243532", "", "Hello1", 123456);
 
 let blockchain: Block[] = [genesisBlock]; //타입스크립트는 블록만 블록체인에 들어갈 수 있게 해준다.
 
-const getBlockchain = () : Block[] => blockchain;  // => 블록체인을 리턴
+const getBlockchain = (): Block[] => blockchain  // => 블록체인을 리턴
 
-const getLatestBlock =() : Block => blockchain[blockchain.length - 1]; //블록체인이 얼마나 긴지 알기위한 변수 블록체인 중에서 가장 최근
+const getLatestBlock = () : Block => blockchain[blockchain.length - 1]; //블록체인이 얼마나 긴지 알기위한 변수 블록체인 중에서 가장 최근
 
-const getNewTimeStamp =() : number => Math.round(new Date().getTime() / 1000);
+const getNewTimeStamp = () : number => Math.round(new Date().getTime() / 1000);
 //블록체인 : 블록의 연결
 //블록을 만들기 위해서는 해쉬가 필요하고 해쉬는 모든 속성을 길고 수학적으로 하나의 문자열로 결합한 것 
 
@@ -68,6 +68,7 @@ const createNewBlock = (data:string) : Block =>{
     newTimestamp, 
     data
     );
+
   const newBlock : Block = new Block(
     newIndex, 
     newHash, 
@@ -75,13 +76,16 @@ const createNewBlock = (data:string) : Block =>{
     data, 
     newTimestamp
     );
+    addBlock(newBlock);
     return newBlock;
+    
 };
+
 //검증과정
 const getHashforBlock = (aBlock : Block) :string => Block.calculateBlockHash(aBlock.index, aBlock.previousHash, aBlock.timestamp, aBlock.data); //해쉬 검증
 
 const isBlockVaild = (candidateBlock : Block, previousBlock : Block) : boolean => {
-  if(Block.validateStructure(candidateBlock)){ //구조를 검증 후 유효하지 않으면 false 리턴
+  if(!Block.validateStructure(candidateBlock)){ //구조를 검증 후 유효하지 않으면 false 리턴
     return false;
   }else if(previousBlock.index + 1 !== candidateBlock.index){ //previous블록의 인덱스+1과 candidate블록의 인덱스가 다르면 false 리턴
     return false;
@@ -93,12 +97,16 @@ const isBlockVaild = (candidateBlock : Block, previousBlock : Block) : boolean =
     return true;
   }
 };
-
+//addBlock을 createNewBlock 함수에 연결
 const addBlock = (candidateBlock : Block) : void => {
   if(isBlockVaild(candidateBlock, getLatestBlock())){
     blockchain.push(candidateBlock);
   }
 };
 
+createNewBlock("second block");
+createNewBlock("third block");
+createNewBlock("fourth block");
 
+console.log(blockchain);
 export {};
