@@ -2,11 +2,6 @@ import * as CryptoJS from "crypto-js";
 
 //블록 구조 
 class Block{
-  public index:number;
-  public hash:string;
-  public previousHash : string;
-  public data : string;
-  public timestamp : number;
 
 //static method = 메서드가 block class 안에 있고 클래스가 생성되지 않아도 호출 가능한 class
   static calculateBlockHash = (
@@ -15,6 +10,22 @@ class Block{
     timestamp:number, 
     data:string):  string => 
     CryptoJS.SHA256(index + previousHash + timestamp + data).toString();
+
+  static validateStructure = (aBlock : Block) : boolean => 
+    typeof aBlock.index === "number" && 
+    typeof aBlock.hash ==="string" && 
+    typeof aBlock.previousHash === "string" &&
+    typeof aBlock.timestamp === "number" &&
+    typeof aBlock.data === "string";
+
+    //블록의 구조가 유효한지 아닌지 체크
+
+  public index:number;
+  public hash:string;
+  public previousHash : string;
+  public data : string;
+  public timestamp: number;
+  //블록구조
     
   
   constructor(  //함수
@@ -65,6 +76,16 @@ const createNewBlock = (data:string) : Block =>{
     return newBlock;
 };
 
-console.log(createNewBlock("hello"), createNewBlock("bye bye"));
+const isBlockVaild = (candidateBlock : Block, previousBlock : Block) : boolean => {
+  if(Block.validateStructure(candidateBlock)){
+    return false;
+  }else if(previousBlock.index + 1 !== candidateBlock.index){
+    return false;
+ //previous블록의 인덱스+1과 candidate브롥의 인덱스가 다르면 false를 리턴
+  }else if(previousBlock.hash !== candidateBlock.previousHash){
+    return false;
+  }
 
+};
+//cadidate 블럭과 previous 블럭을 불러와 둘을 비교한다.
 export {};
