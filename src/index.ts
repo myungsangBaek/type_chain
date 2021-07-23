@@ -1,4 +1,5 @@
 import * as CryptoJS from "crypto-js";
+import { isBlock } from "typescript";
 
 //블록 구조 
 class Block{
@@ -11,21 +12,22 @@ class Block{
     data:string):  string => 
     CryptoJS.SHA256(index + previousHash + timestamp + data).toString();
 
-  static validateStructure = (aBlock : Block) : boolean => 
+ //블록의 구조가 유효한지 아닌지 체크   
+  static validateStructure = (aBlock : Block) : boolean =>  
     typeof aBlock.index === "number" && 
     typeof aBlock.hash ==="string" && 
     typeof aBlock.previousHash === "string" &&
     typeof aBlock.timestamp === "number" &&
     typeof aBlock.data === "string";
 
-    //블록의 구조가 유효한지 아닌지 체크
-
+   
+  //블록구조
   public index:number;
   public hash:string;
   public previousHash : string;
   public data : string;
   public timestamp: number;
-  //블록구조
+ 
     
   
   constructor(  //함수
@@ -46,8 +48,8 @@ class Block{
 
 const genesisBlock:Block = new Block(0, "1231243532", "", "Hello", 123456);
 
-let blockchain: Block[] = [genesisBlock];
-//타입스크립트는 블록만 블록체인에 들어갈 수 있게 해준다.
+let blockchain: Block[] = [genesisBlock]; //타입스크립트는 블록만 블록체인에 들어갈 수 있게 해준다.
+
 const getBlockchain = () : Block[] => blockchain;  // => 블록체인을 리턴
 
 const getLatestBlock =() : Block => blockchain[blockchain.length - 1]; //블록체인이 얼마나 긴지 알기위한 변수 블록체인 중에서 가장 최근
@@ -75,17 +77,28 @@ const createNewBlock = (data:string) : Block =>{
     );
     return newBlock;
 };
+//검증과정
+const getHashforBlock = (aBlock : Block) :string => Block.calculateBlockHash(aBlock.index, aBlock.previousHash, aBlock.timestamp, aBlock.data); //해쉬 검증
 
 const isBlockVaild = (candidateBlock : Block, previousBlock : Block) : boolean => {
-  if(Block.validateStructure(candidateBlock)){
+  if(Block.validateStructure(candidateBlock)){ //구조를 검증 후 유효하지 않으면 false 리턴
     return false;
-  }else if(previousBlock.index + 1 !== candidateBlock.index){
+  }else if(previousBlock.index + 1 !== candidateBlock.index){ //previous블록의 인덱스+1과 candidate블록의 인덱스가 다르면 false 리턴
     return false;
- //previous블록의 인덱스+1과 candidate브롥의 인덱스가 다르면 false를 리턴
-  }else if(previousBlock.hash !== candidateBlock.previousHash){
+  }else if(previousBlock.hash !== candidateBlock.previousHash){ //previous블록의 해쉬가 candidate blcok previous hash와 같이 않다면 false 리턴
     return false;
+  }else if(getHashforBlock(candidateBlock) !== candidateBlock.hash){ //해쉬를 계산했는데 다른 해쉬를 갖고있다면 false 리턴
+    return false;
+  }else {
+    return true;
   }
-
 };
-//cadidate 블럭과 previous 블럭을 불러와 둘을 비교한다.
+
+const addBlock = (candidateBlock : Block) : void => {
+  if(isBlockVaild(candidateBlock, getLatestBlock())){
+    blockchain.push(candidateBlock);
+  }
+};
+
+
 export {};
